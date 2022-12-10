@@ -44,9 +44,15 @@ namespace uludag_sms_svc
 
             ResponseModel result = new()
             {
-                total = count,
                 success = true,
-                data = data
+                data = new 
+                {
+                    current = listModel.current,
+                    data = data,
+                    pageSize = listModel.pageSize,
+                    success = true,
+                    total = count,
+                }
             };
 
             return result;
