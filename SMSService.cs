@@ -25,7 +25,8 @@ namespace uludag_sms_svc
                 bookStoreDatabaseSettings.Value.SMSCollectionName);
         }
 
-        public async Task<List<SMSModel>> GetAsync(ListModel listModel) {
+        public ResponseModel GetAsync(ListModel listModel)
+        {
             //var builder = Builders<SMSModel>.Filter;
 
             //var filterData = JsonConvert.DeserializeObject<List<KeyValuePair<string, string>>>(listModel.filterData);
@@ -36,10 +37,23 @@ namespace uludag_sms_svc
             //    dynamicQuery &= builder.Or(item.Key, item.Value);
             //}
 
-            return await _smsCollection.Find(_ => true).Skip(listModel.offset).Limit(listModel.listPerPage).SortByDescending(i => i.eklenmeTarih).ToListAsync();
+            var offset = (listModel.current - 1) * listModel.pageSize;
+
+            List<SMSModel> data =  _smsCollection.Find(_ => true).Skip(offset).Limit(listModel.pageSize).SortByDescending(i => i.eklenmeTarih).ToList();
+            var count = _smsCollection.Find(_ => true).CountDocuments();
+
+            ResponseModel result = new()
+            {
+                total = count,
+                success = true,
+                data = data
+            };
+
+            return result;
         }
 
-        public Task CreateAsync(SMSModel newBook) {
+        public Task CreateAsync(SMSModel newBook)
+        {
             newBook.eklenmeTarih = DateTime.Now;
             return _smsCollection.InsertOneAsync(newBook);
         }

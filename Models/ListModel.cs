@@ -5,8 +5,14 @@ namespace uludag_sms_svc.Models
 {
     public class ListModel
     {
-        public int offset { get; set; }
-        public int listPerPage { get; set; }
-        public string filterData { get; set; }
+        public int current { get; set; }
+        public int pageSize { get; set; }
+    }
+
+    public class ResponseModel
+    {
+        public long total { get; set; }
+        public bool success { get; set; }
+        public object? data { get; set; }
     }
 }
