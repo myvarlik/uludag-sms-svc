@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using uludag_sms_svc.Models;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace uludag_sms_svc
 {
@@ -58,10 +59,15 @@ namespace uludag_sms_svc
             return result;
         }
 
-        public Task CreateAsync(SMSModel newBook)
+        public Task CreateAsync(SMSModel newSms)
         {
-            newBook.eklenmeTarih = DateTime.Now;
-            return _smsCollection.InsertOneAsync(newBook);
+            if (string.IsNullOrEmpty(newSms.mesaj))
+            {
+                return null;
+            }
+
+            newSms.eklenmeTarih = DateTime.Now;
+            return _smsCollection.InsertOneAsync(newSms);
         }
 
         public async Task UpdateAsync(string id, SMSModel updatedBook) =>
@@ -70,22 +76,37 @@ namespace uludag_sms_svc
         public async Task RemoveAsync(string id) =>
             await _smsCollection.DeleteOneAsync(x => x.id == id);
 
-        public async void Gonder()
+        public void Gonder()
         {
-            FilterDefinition<SMSModel> nameFilter = Builders<SMSModel>.Filter.Eq(x => x.durum, 0);
+            FilterDefinition<SMSModel> nameFilter = Builders<SMSModel>.Filter.Eq(x => x.durum, 1);
             FilterDefinition<SMSModel> combineFilters = Builders<SMSModel>.Filter.And(nameFilter);
 
-            List<SMSModel> SMSModels = await _smsCollection.Find(combineFilters).ToListAsync();
+            List<SMSModel> SMSModels = _smsCollection.Find(combineFilters).ToList();
 
             foreach (var sms in SMSModels)
             {
+                if (string.IsNullOrEmpty(sms.mesaj))
+                {
+                    continue;
+                }
+
                 smsData MesajPaneli = new smsData();
 
                 List<string> telList = new List<string>();
 
                 foreach (var kisi in sms.kisiler)
                 {
-                    telList.Add(kisi.numara);
+                    if (string.IsNullOrEmpty(kisi.numara))
+                    {
+                        continue;
+                    }
+
+                    Match Eslesme = Regex.Match(kisi.numara, "5[0-9]{9}", RegexOptions.IgnoreCase);
+
+                    if (Eslesme.Success)
+                    {
+                        telList.Add(kisi.numara);
+                    }
                 }
 
                 MesajPaneli.user = new UserInfo("5322407700", "q1qwtc");
@@ -102,13 +123,13 @@ namespace uludag_sms_svc
                     sms.kullanilanKredi = ReturnData.amount;
                     sms.kalanKredi = ReturnData.credits;
                     sms.gonderilmeTarih = DateTime.Now;
-                    await _smsCollection.ReplaceOneAsync(x => x.id == sms.id, sms);
+                    _smsCollection.ReplaceOne(x => x.id == sms.id, sms);
                 }
                 else
                 {
                     sms.durum = 2;
                     sms.hata = ReturnData.error;
-                    await _smsCollection.ReplaceOneAsync(x => x.id == sms.id, sms);
+                    _smsCollection.ReplaceOne(x => x.id == sms.id, sms);
                 }
             }
         }

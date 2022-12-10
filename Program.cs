@@ -27,6 +27,8 @@ app.MapPost("/list", ResponseModel ([FromBody] ListModel listModel, SMSService s
 
 app.MapGet("/send", (SMSService smsService) => smsService.Gonder());
 
+app.MapDelete("/", async ([FromQuery] string id, SMSService smsService) => await smsService.RemoveAsync(id));
+
 app.MapPost("/", async ([FromBody] SMSModel smsModel, SMSService smsService) =>
 {
     await smsService.CreateAsync(smsModel);
