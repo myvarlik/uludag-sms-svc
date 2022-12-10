@@ -7,6 +7,7 @@ on:
       - "config/**"
       - "SMSService.cs"
       - "Program.cs"
+      - "appsettings.json"
       - "Dockerfile"
       - ".github/workflows/**"
 
