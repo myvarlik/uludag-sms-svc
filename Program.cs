@@ -21,7 +21,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-app.MapGet("/apirun", () => "Api Run");
+app.MapGet("/apirun", () => "Api Runs");
 
 app.MapPost("/list", async Task<List<SMSModel>> ([FromBody] ListModel listModel, SMSService smsService) => await smsService.GetAsync(listModel));
 
