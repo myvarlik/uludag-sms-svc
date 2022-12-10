@@ -78,7 +78,7 @@ namespace uludag_sms_svc
 
         public void Gonder()
         {
-            FilterDefinition<SMSModel> nameFilter = Builders<SMSModel>.Filter.Eq(x => x.durum, 1);
+            FilterDefinition<SMSModel> nameFilter = Builders<SMSModel>.Filter.Eq(x => x.durum, 0);
             FilterDefinition<SMSModel> combineFilters = Builders<SMSModel>.Filter.And(nameFilter);
 
             List<SMSModel> SMSModels = _smsCollection.Find(combineFilters).ToList();
