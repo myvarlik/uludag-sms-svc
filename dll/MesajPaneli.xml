@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MesajPaneli</name>
+    </assembly>
+    <members>
+        <member name="T:MesajPaneli.Models.JsonPostModels.msgdata">
+            <summary>
+            Mesaj içeriği
+            </summary>
+        </member>
+        <member name="M:MesajPaneli.Models.JsonPostModels.msgdata.#ctor(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="telx">Telefon numarası (5554443322)</param>
+            <param name="msgx">Mesaj içeriği</param>
+        </member>
+        <member name="M:MesajPaneli.Models.JsonPostModels.msgdata.#ctor(System.Collections.Generic.List{System.String},System.String)">
+            <summary>
+            
+            </summary>
+            <param name="telx">Telefon numarası (5554443322)</param>
+            <param name="msgx">Mesaj içeriği</param>
+        </member>
+        <member name="M:MesajPaneli.Business.smsData.DoPost(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Adresten gelen cevabı Json formatında geri döndürür.
+            </summary>
+            <param name="URL">WebApi adresi.</param>
+            <returns></returns>
+        </member>
+        <member name="T:MesajPaneli.Models.ReturnValue">
+            <summary>
+            Ortak özellikler
+            </summary>
+            <summary>
+            Sms gönderdikten sonraki dönecek veri yapısı.
+            </summary>
+            <summary>
+            Refund Data Geri Dönüş Bilgisi
+            </summary>
+        </member>
+        <member name="M:MesajPaneli.Models.JsonPostModels.UserInfo.#ctor(System.String,System.String)">
+            <summary>
+            Kullanıcı bilgileri
+            </summary>
+            <param name="namex">Kullanıcı Adı</param>
+            <param name="passx">Kullanıcı Şifresi</param>
+        </member>
+        <member name="M:MesajPaneli.Models.JsonPostModels.UserInfo.#ctor(System.String,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="namex">Kullanıcı Adı</param>
+            <param name="passx">Kullanıcı Şifresi</param>
+            <param name="newpassx">Yeni Şifre</param>
+        </member>
+    </members>
+</doc>

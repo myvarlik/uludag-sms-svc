@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: uludagsmssvc
+  namespace: uludag-enerji
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: uludagsms
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uludagsmsapp
+  namespace: uludag-enerji
+  labels:
+    app: uludagsms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uludagsms
+  template:
+    metadata:
+      labels:
+        app: uludagsms
+    spec:
+      containers:
+        - name: uludagsmsapp
+          image: <IMAGE>
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: gh-regcred

@@ -1,0 +1,54 @@
+name: build
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "config/**"
+      - "SMSService.cs"
+      - "Program.cs"
+      - "Dockerfile"
+      - ".github/workflows/**"
+
+env:
+  IMAGE_NAME: "uludag-sms"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@main
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Build image
+        run: docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }} --label "runnumber=${GITHUB_RUN_ID}"
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push image and Update deploy file
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          echo $VERSION
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo $VERSION
+          docker tag ${{ env.IMAGE_NAME }} $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+          echo ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:$VERSION
+          # update deploy file
+          sed -i 's|<IMAGE>|ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:'${VERSION}'|' $GITHUB_WORKSPACE/config/deploy.yml
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 uludag-hub
+      - name: Deploy to DigitalOcean Kubernetes
+        run: kubectl apply -f $GITHUB_WORKSPACE/config/deploy.yml
+      - name: RollOut Restart Deployment
+        run: kubectl rollout restart deployment uludagsmsapp -n uludag-enerji
+      - name: Verify deployment
+        run: kubectl rollout status deployment/uludagsmsapp -n uludag-enerji
