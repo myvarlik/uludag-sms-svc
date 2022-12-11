@@ -23,20 +23,9 @@ app.UseHttpsRedirection();
 
 app.MapGet("/apirun", () => "Api Runs");
 
-app.MapPost("/list", ResponseModel ([FromBody] ListModel listModel, SMSService smsService) => smsService.GetAsync(listModel));
-
+app.MapPost("/list", ResponseModel ([FromBody] ListModel listModel, SMSService smsService) => smsService.Get(listModel));
 app.MapGet("/send", (SMSService smsService) => smsService.Gonder());
-
-app.MapDelete("/", async ([FromQuery] string id, SMSService smsService) => await smsService.RemoveAsync(id));
-
-app.MapPost("/", async ([FromBody] SMSModel smsModel, SMSService smsService) =>
-{
-    await smsService.CreateAsync(smsModel);
-});
-
-app.MapPut("/", async ([FromBody] SMSModel smsModel, SMSService smsService) =>
-{
-    await smsService.UpdateAsync(smsModel.id, smsModel);
-});
+app.MapDelete("/", ([FromQuery] string id, SMSService smsService) => smsService.Remove(id));
+app.MapPost("/", ([FromBody] SMSModel smsModel, SMSService smsService) => smsService.Create(smsModel));
 
 app.Run();

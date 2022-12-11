@@ -26,7 +26,7 @@ namespace uludag_sms_svc
                 bookStoreDatabaseSettings.Value.SMSCollectionName);
         }
 
-        public ResponseModel GetAsync(ListModel listModel)
+        public ResponseModel Get(ListModel listModel)
         {
             //var builder = Builders<SMSModel>.Filter;
 
@@ -59,22 +59,23 @@ namespace uludag_sms_svc
             return result;
         }
 
-        public Task CreateAsync(SMSModel newSms)
+        public bool Create(SMSModel newSms)
         {
             if (string.IsNullOrEmpty(newSms.mesaj))
             {
-                return null;
+                return false;
             }
 
             newSms.eklenmeTarih = DateTime.Now;
-            return _smsCollection.InsertOneAsync(newSms);
+            _smsCollection.InsertOne(newSms);
+            return true;
         }
 
-        public async Task UpdateAsync(string id, SMSModel updatedBook) =>
-            await _smsCollection.ReplaceOneAsync(x => x.id == id, updatedBook);
-
-        public async Task RemoveAsync(string id) =>
-            await _smsCollection.DeleteOneAsync(x => x.id == id);
+        public bool Remove(string id)
+        {
+            _smsCollection.DeleteOne(x => x.id == id);
+            return true;
+        }
 
         public void Gonder()
         {
