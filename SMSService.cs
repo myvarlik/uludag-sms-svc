@@ -59,25 +59,42 @@ namespace uludag_sms_svc
             return result;
         }
 
-        public bool Create(SMSModel newSms)
+        public ResponseModel Create(SMSModel newSms)
         {
+            ResponseModel result = new()
+            {
+                success = false,
+                data = false
+            };
+
             if (string.IsNullOrEmpty(newSms.mesaj))
             {
-                return false;
+                return result;
             }
 
             newSms.eklenmeTarih = DateTime.Now;
             _smsCollection.InsertOne(newSms);
-            return true;
+                        
+            result.data = true;
+            result.success = true;
+            return result;
         }
 
-        public bool Remove(string id)
+        public ResponseModel Remove(string id)
         {
+            ResponseModel result = new()
+            {
+                success = false,
+                data = false
+            };
+
             _smsCollection.DeleteOne(x => x.id == id);
-            return true;
+            result.data = true;
+            result.success = true;
+            return result;
         }
 
-        public void Gonder()
+        public ResponseModel Gonder()
         {
             FilterDefinition<SMSModel> nameFilter = Builders<SMSModel>.Filter.Eq(x => x.durum, 0);
             FilterDefinition<SMSModel> combineFilters = Builders<SMSModel>.Filter.And(nameFilter);
@@ -133,6 +150,16 @@ namespace uludag_sms_svc
                     _smsCollection.ReplaceOne(x => x.id == sms.id, sms);
                 }
             }
+
+            ResponseModel result = new()
+            {
+                success = false,
+                data = false
+            };
+
+            result.data = true;
+            result.success = true;
+            return result;
         }
     }
 }
