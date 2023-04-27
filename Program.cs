@@ -11,7 +11,7 @@ builder.Services.Configure<SMSStoreDatabaseSettings>(builder.Configuration.GetSe
 // Add services to the container.
 builder.Services.AddSingleton<SMSService>();
 
-string rabbitmqConnectionString = "host=localhost:5672";
+string rabbitmqConnectionString = "host=10.245.195.44:5672;virtualhost=/;username=myvarlik;password=celeron504";
 var bus = RabbitHutch.CreateBus(rabbitmqConnectionString);
 
 // Kuyruk oluþtur
