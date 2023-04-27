@@ -40,13 +40,13 @@ namespace uludag_sms_svc
 
             var offset = (listModel.current - 1) * listModel.pageSize;
 
-            List<SMSModel> data =  _smsCollection.Find(_ => true).Skip(offset).Limit(listModel.pageSize).SortByDescending(i => i.eklenmeTarih).ToList();
+            List<SMSModel> data = _smsCollection.Find(_ => true).Skip(offset).Limit(listModel.pageSize).SortByDescending(i => i.eklenmeTarih).ToList();
             var count = _smsCollection.Find(_ => true).CountDocuments();
 
             ResponseModel result = new()
             {
                 success = true,
-                data = new 
+                data = new
                 {
                     current = listModel.current,
                     data = data,
@@ -74,7 +74,7 @@ namespace uludag_sms_svc
 
             newSms.eklenmeTarih = DateTime.Now;
             _smsCollection.InsertOne(newSms);
-                        
+
             result.data = true;
             result.success = true;
             return result;
@@ -161,5 +161,40 @@ namespace uludag_sms_svc
             result.success = true;
             return result;
         }
+
+        public static void TekliGonder(SMSModel sms)
+        {
+            if (string.IsNullOrEmpty(sms.mesaj))
+            {
+                Task.Yield();
+                return;
+            }
+
+            smsData MesajPaneli = new smsData();
+
+            List<string> telList = new List<string>();
+
+            foreach (var kisi in sms.kisiler)
+            {
+                if (string.IsNullOrEmpty(kisi.numara))
+                {
+                    continue;
+                }
+
+                Match Eslesme = Regex.Match(kisi.numara, "5[0-9]{9}", RegexOptions.IgnoreCase);
+
+                if (Eslesme.Success)
+                {
+                    telList.Add(kisi.numara);
+                }
+            }
+
+            MesajPaneli.user = new UserInfo("5322407700", "q1qwtc");
+            MesajPaneli.msgBaslik = "ULUDAGENRJI";
+            MesajPaneli.msgData.Add(new msgdata(telList, sms.mesaj));
+            MesajPaneli.tr = true;
+
+            MesajPaneli.DoPost("http://api.mesajpaneli.com/json_api/", true, true);
+        }        
     }
 }

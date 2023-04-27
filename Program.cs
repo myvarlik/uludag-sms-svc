@@ -1,14 +1,29 @@
+using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using uludag_sms_svc;
 using uludag_sms_svc.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<SMSStoreDatabaseSettings>(
-    builder.Configuration.GetSection("SMSStoreDatabase"));
+builder.Services.Configure<SMSStoreDatabaseSettings>(builder.Configuration.GetSection("SMSStoreDatabase"));
 
 // Add services to the container.
 builder.Services.AddSingleton<SMSService>();
+
+string rabbitmqConnectionString = "host=localhost:5672";
+var bus = RabbitHutch.CreateBus(rabbitmqConnectionString);
+
+// Kuyruk oluþtur
+var queue = bus.Advanced.QueueDeclare("sms-gonder");
+// Kuyruða abone ol
+bus.Advanced.Consume(queue, (body, properties, info) =>
+{
+    var message = Encoding.UTF8.GetString(body.Span);
+    SMSModel mail = System.Text.Json.JsonSerializer.Deserialize<SMSModel>(message);
+    SMSService.TekliGonder(mail);
+    return Task.CompletedTask;
+});
 
 var app = builder.Build();
 
